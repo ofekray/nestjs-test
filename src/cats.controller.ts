@@ -1,35 +1,34 @@
 import { Controller, Get, Post, HttpCode, Header, Body, Param, NotFoundException, BadRequestException, ParseIntPipe } from '@nestjs/common';
-import { Cat } from './models/Cat';
+import { CatsService } from './providers/cats/cats.service';
+import { Cat } from './models/cats/cat.interface';
+import { CreateCatDto } from './models/cats/create-cat.dto';
 
 @Controller('cats')
 export class CatsController {
-    private cats: Map<number, Cat>;
-
-    constructor() {
-        this.cats = new Map<number, Cat>();
-    }
+    
+    constructor(private readonly catsService: CatsService) {}
 
     @Post()
     @HttpCode(204)
-    create(@Body() cat: Cat): Cat {
-        if (this.cats.has(cat.id)) {
+    create(@Body() cat: CreateCatDto) {
+        if (this.catsService.findById(cat.id)) {
             throw new BadRequestException('Cat already found');
         }
 
-        this.cats.set(cat.id, cat);
-        return cat;
+        this.catsService.create(cat.id, cat);
     }
 
     @Get()
     @Header('Cache-Control', 'none') // Custom response header
     findAll(): Cat[] {
-        return Array.from(this.cats.values());
+        return this.catsService.findAll();
     }
 
     @Get(':id')
     findOne(@Param('id', ParseIntPipe) id: number): Cat {
-        if (this.cats.has(id)) {
-            return this.cats.get(id);
+        const cat = this.catsService.findById(id);
+        if (cat) {
+            return cat;
         }
 
         throw new NotFoundException('Cat not found');
