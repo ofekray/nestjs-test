@@ -1,9 +1,11 @@
-import { Controller, Get, Post, HttpCode, Header, Body, Param, NotFoundException, BadRequestException, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, HttpCode, Header, Body, Param, NotFoundException, BadRequestException, ParseIntPipe, UseFilters } from '@nestjs/common';
 import { CatsService } from './providers/cats/cats.service';
 import { Cat } from './models/cats/cat.interface';
 import { CreateCatDto } from './models/cats/create-cat.dto';
+import { HttpExceptionFilter } from './common/helpers/http-exception.filter';
 
 @Controller('cats')
+@UseFilters(HttpExceptionFilter)
 export class CatsController {
     
     constructor(private readonly catsService: CatsService) {}
